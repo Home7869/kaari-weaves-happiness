@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     const supabase = adminClient();
     const { data, error } = await supabase
       .from("orders")
-      .select("order_number, customer_name, customer_email, items, subtotal, shipping_charges, total, payment_status, order_status, created_at, updated_at, webhook_received_at, shipping_address, cashfree_mode")
+      .select("order_number, customer_name, customer_email, items, subtotal, shipping_charges, total, payment_status, order_status, created_at, updated_at, webhook_received_at, shipping_address, cashfree_mode, tracking_carrier, tracking_number, tracking_url, shipped_at, delivered_at")
       .eq("order_number", order_number)
       .ilike("customer_email", email)
       .maybeSingle();
@@ -45,6 +45,11 @@ Deno.serve(async (req) => {
       updated_at: data.updated_at,
       webhook_received_at: data.webhook_received_at,
       shipping_address: data.shipping_address,
+      tracking_carrier: data.tracking_carrier,
+      tracking_number: data.tracking_number,
+      tracking_url: data.tracking_url,
+      shipped_at: data.shipped_at,
+      delivered_at: data.delivered_at,
     });
   } catch (e) {
     return json({ error: String((e as Error).message ?? e) }, 500);
