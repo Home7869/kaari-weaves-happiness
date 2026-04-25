@@ -17,10 +17,17 @@ Deno.serve(async (req) => {
         if (error) throw error;
         return json(data);
       }
-      // Stats + orders for dashboard/list
-      const { data: orders, error } = await supabase
-        .from("orders").select("*").order("created_at", { ascending: false }).limit(500);
+      // Optional filters: ?mode=sandbox|production  ?payment_status=paid|pending|failed
+      const mode = url.searchParams.get("mode");
+      const paymentStatus = url.searchParams.get("payment_status");
+
+      let q = supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(500);
+      if (mode && mode !== "all") q = q.eq("cashfree_mode", mode);
+      if (paymentStatus && paymentStatus !== "all") q = q.eq("payment_status", paymentStatus);
+
+      const { data: orders, error } = await q;
       if (error) throw error;
+
       const { count: productCount } = await supabase
         .from("products").select("*", { count: "exact", head: true });
       const { count: customerCount } = await supabase

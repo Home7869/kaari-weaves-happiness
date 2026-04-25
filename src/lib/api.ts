@@ -86,6 +86,8 @@ export const api = {
   // Orders
   createOrder: (body: unknown) => callFn("/create-order", { method: "POST", body }),
   getOrder: (order_number: string) => callFn("/get-order", { query: { order_number } }),
+  trackOrder: (order_number: string, email: string) =>
+    callFn("/track-order", { method: "POST", body: { order_number, email } }),
 
   // Admin
   adminLogin: (password: string) => callFn("/admin-login", { method: "POST", body: { password } }),
@@ -101,7 +103,12 @@ export const api = {
     return callFn("/admin-upload", { method: "POST", body: fd, admin: true, isFormData: true });
   },
   adminDeleteImage: (path: string) => callFn("/admin-upload", { method: "DELETE", admin: true, body: { path } }),
-  adminOrders: () => callFn("/admin-orders", { admin: true }),
+  adminOrders: (filters?: { mode?: string; payment_status?: string }) => {
+    const query: Record<string, string> = {};
+    if (filters?.mode && filters.mode !== "all") query.mode = filters.mode;
+    if (filters?.payment_status && filters.payment_status !== "all") query.payment_status = filters.payment_status;
+    return callFn("/admin-orders", { admin: true, query: Object.keys(query).length ? query : undefined });
+  },
   adminUpdateOrder: (id: string, body: unknown) => callFn("/admin-orders", { method: "PUT", admin: true, query: { id }, body }),
   adminCustomers: () => callFn("/admin-customers", { admin: true }),
 };

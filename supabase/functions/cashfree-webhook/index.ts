@@ -43,8 +43,9 @@ Deno.serve(async (req) => {
   if (status === "SUCCESS") payment_status = "paid";
   else if (status === "FAILED" || status === "USER_DROPPED") payment_status = "failed";
 
-  if (payment_status) {
-    await supabase.from("orders").update({ payment_status }).eq("order_number", orderId);
-  }
+  const update: Record<string, unknown> = { webhook_received_at: new Date().toISOString() };
+  if (payment_status) update.payment_status = payment_status;
+  await supabase.from("orders").update(update).eq("order_number", orderId);
+
   return new Response("ok", { headers: corsHeaders });
 });

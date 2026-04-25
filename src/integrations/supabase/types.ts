@@ -46,6 +46,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          cashfree_mode: string | null
           cashfree_order_id: string | null
           created_at: string
           customer_email: string
@@ -62,8 +63,10 @@ export type Database = {
           subtotal: number
           total: number
           updated_at: string
+          webhook_received_at: string | null
         }
         Insert: {
+          cashfree_mode?: string | null
           cashfree_order_id?: string | null
           created_at?: string
           customer_email: string
@@ -80,8 +83,10 @@ export type Database = {
           subtotal: number
           total: number
           updated_at?: string
+          webhook_received_at?: string | null
         }
         Update: {
+          cashfree_mode?: string | null
           cashfree_order_id?: string | null
           created_at?: string
           customer_email?: string
@@ -98,6 +103,7 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
+          webhook_received_at?: string | null
         }
         Relationships: []
       }
