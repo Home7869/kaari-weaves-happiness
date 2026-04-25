@@ -40,11 +40,24 @@ export default function Checkout() {
       });
 
       if (res.payment_session_id) {
-        // TODO Cashfree drop-in: await load script + initialiseDropin({ paymentSessionId, returnUrl })
-        // For now we store the order and redirect to success page (stub-friendly).
-        toast.success("Order placed! Cashfree payment session created.");
-        clear();
-        nav(`/order-success?orderId=${res.order_number}`);
+        // Real Cashfree Drop-in checkout
+        const mode: "sandbox" | "production" = res.cashfree_mode === "production" ? "production" : "sandbox";
+        const cashfree = await loadCashfree(mode);
+        const returnUrl = `${window.location.origin}/order-success?orderId=${res.order_number}`;
+        const result = await cashfree.checkout({
+          paymentSessionId: res.payment_session_id,
+          redirectTarget: "_self",
+          returnUrl,
+        });
+        // For _self redirect, code below typically does not execute (browser navigates away).
+        if (result?.error) {
+          toast.error(result.error.message ?? "Payment failed");
+          return;
+        }
+        if (result?.paymentDetails) {
+          clear();
+          nav(`/order-success?orderId=${res.order_number}`);
+        }
       } else if (res.stub) {
         toast.success("Order created (demo mode — Cashfree not configured)");
         clear();
