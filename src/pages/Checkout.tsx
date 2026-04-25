@@ -6,6 +6,7 @@ import { ProductPlaceholder } from "@/components/site/ProductPlaceholder";
 import { useCart } from "@/lib/cart";
 import { formatINR } from "@/lib/format";
 import { api } from "@/lib/api";
+import { loadCashfree } from "@/lib/cashfree";
 import { toast } from "sonner";
 
 type Form = { name: string; email: string; phone: string; line1: string; line2: string; city: string; state: string; pincode: string };
