@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       if (!id) return json({ error: "id required" }, 400);
       const body = await req.json();
       const update = sanitize(body);
-      if (update.slug) update.slug = slugify(update.slug);
+      if (typeof update.slug === "string") update.slug = slugify(update.slug);
       const { data, error } = await supabase.from("products").update(update).eq("id", id).select().single();
       if (error) throw error;
       return json(data);
