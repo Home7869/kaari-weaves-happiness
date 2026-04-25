@@ -52,16 +52,21 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          delivered_at: string | null
           id: string
           items: Json
           order_number: string
           order_status: string
           payment_session_id: string | null
           payment_status: string
+          shipped_at: string | null
           shipping_address: Json
           shipping_charges: number
           subtotal: number
           total: number
+          tracking_carrier: string | null
+          tracking_number: string | null
+          tracking_url: string | null
           updated_at: string
           webhook_received_at: string | null
         }
@@ -72,16 +77,21 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          delivered_at?: string | null
           id?: string
           items: Json
           order_number: string
           order_status?: string
           payment_session_id?: string | null
           payment_status?: string
+          shipped_at?: string | null
           shipping_address: Json
           shipping_charges?: number
           subtotal: number
           total: number
+          tracking_carrier?: string | null
+          tracking_number?: string | null
+          tracking_url?: string | null
           updated_at?: string
           webhook_received_at?: string | null
         }
@@ -92,16 +102,21 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           customer_phone?: string
+          delivered_at?: string | null
           id?: string
           items?: Json
           order_number?: string
           order_status?: string
           payment_session_id?: string | null
           payment_status?: string
+          shipped_at?: string | null
           shipping_address?: Json
           shipping_charges?: number
           subtotal?: number
           total?: number
+          tracking_carrier?: string | null
+          tracking_number?: string | null
+          tracking_url?: string | null
           updated_at?: string
           webhook_received_at?: string | null
         }
