@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { LogOut, LayoutDashboard, Package, ShoppingBag, Users, Settings as SettingsIcon } from "lucide-react";
+import { LogOut, LayoutDashboard, Package, ShoppingBag, Users, Settings as SettingsIcon, CreditCard } from "lucide-react";
 import { clearAdminToken } from "@/lib/api";
 
 export function AdminLayout({ children }: { children: ReactNode }) {
