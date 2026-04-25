@@ -103,10 +103,13 @@ export const api = {
     return callFn("/admin-upload", { method: "POST", body: fd, admin: true, isFormData: true });
   },
   adminDeleteImage: (path: string) => callFn("/admin-upload", { method: "DELETE", admin: true, body: { path } }),
-  adminOrders: (filters?: { mode?: string; payment_status?: string }) => {
+  adminOrders: (filters?: { mode?: string; payment_status?: string; q?: string; page?: number; page_size?: number }) => {
     const query: Record<string, string> = {};
     if (filters?.mode && filters.mode !== "all") query.mode = filters.mode;
     if (filters?.payment_status && filters.payment_status !== "all") query.payment_status = filters.payment_status;
+    if (filters?.q && filters.q.trim()) query.q = filters.q.trim();
+    if (filters?.page) query.page = String(filters.page);
+    if (filters?.page_size) query.page_size = String(filters.page_size);
     return callFn("/admin-orders", { admin: true, query: Object.keys(query).length ? query : undefined });
   },
   adminUpdateOrder: (id: string, body: unknown) => callFn("/admin-orders", { method: "PUT", admin: true, query: { id }, body }),
