@@ -47,6 +47,7 @@ export function Footer({ instagramHandle = "kaari.handmade" }: { instagramHandle
           { label: "All Products", to: "/shop" },
         ])}
         {col("Help", [
+          { label: "Track Your Order", to: "/track" },
           { label: "Shipping Policy", to: "/policies/shipping" },
           { label: "Returns & Refunds", to: "/policies/returns" },
           { label: "Privacy Policy", to: "/policies/privacy" },
