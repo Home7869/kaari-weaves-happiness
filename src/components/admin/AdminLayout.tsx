@@ -18,6 +18,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           <NavLink to="/admin" end className={linkCls}><LayoutDashboard size={16} />Dashboard</NavLink>
           <NavLink to="/admin/products" className={linkCls}><Package size={16} />Products</NavLink>
           <NavLink to="/admin/orders" className={linkCls}><ShoppingBag size={16} />Orders</NavLink>
+          <NavLink to="/admin/payments" className={linkCls}><CreditCard size={16} />Payments</NavLink>
           <NavLink to="/admin/customers" className={linkCls}><Users size={16} />Customers</NavLink>
           <NavLink to="/admin/settings" className={linkCls}><SettingsIcon size={16} />Settings</NavLink>
         </nav>
