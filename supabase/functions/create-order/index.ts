@@ -117,11 +117,15 @@ Deno.serve(async (req) => {
       cashfree_order_id: cfData.cf_order_id ?? cfData.order_id,
     }).eq("id", order.id);
 
+    const cfMode = (Deno.env.get("CASHFREE_ENV") ?? "sandbox").toLowerCase() === "production"
+      ? "production" : "sandbox";
+
     return json({
       order_number,
       order_id: order.id,
       payment_session_id: cfData.payment_session_id,
       cashfree_order_id: cfData.cf_order_id ?? cfData.order_id,
+      cashfree_mode: cfMode,
     });
   } catch (e) {
     console.error(e);
