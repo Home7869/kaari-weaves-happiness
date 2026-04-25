@@ -133,6 +133,55 @@ export default function TrackOrder() {
                 <p className="text-xs text-muted-foreground mt-5">Last updated {fmt(result.updated_at)}</p>
               </div>
 
+              {/* Shipment details */}
+              {(result.tracking_number || result.shipped_at || result.delivered_at) && (
+                <div className="bg-ivory rounded-2xl border border-gold/25 p-6">
+                  <h3 className="font-display text-lg text-maroon-dp mb-4 flex items-center gap-2"><Truck size={16} /> Shipment</h3>
+                  <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                    {result.tracking_carrier && (
+                      <div>
+                        <dt className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Courier</dt>
+                        <dd className="text-maroon-dp">{result.tracking_carrier}</dd>
+                      </div>
+                    )}
+                    {result.tracking_number && (
+                      <div>
+                        <dt className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Tracking number</dt>
+                        <dd className="text-maroon-dp font-mono">
+                          {result.tracking_url ? (
+                            <a href={result.tracking_url} target="_blank" rel="noreferrer" className="underline hover:text-maroon">
+                              {result.tracking_number}
+                            </a>
+                          ) : result.tracking_number}
+                        </dd>
+                      </div>
+                    )}
+                    {result.shipped_at && (
+                      <div>
+                        <dt className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Shipped on</dt>
+                        <dd className="text-maroon-dp">{fmt(result.shipped_at)}</dd>
+                      </div>
+                    )}
+                    {result.delivered_at && (
+                      <div>
+                        <dt className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Delivered on</dt>
+                        <dd className="text-maroon-dp">{fmt(result.delivered_at)}</dd>
+                      </div>
+                    )}
+                  </dl>
+                  {result.tracking_url && (
+                    <a
+                      href={result.tracking_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex mt-5 bg-maroon hover:bg-maroon-dp text-gold font-semibold py-2.5 px-5 rounded-full text-xs uppercase tracking-[0.16em]"
+                    >
+                      Track with courier
+                    </a>
+                  )}
+                </div>
+              )}
+
               {/* Items */}
               <div className="bg-ivory rounded-2xl border border-gold/25 p-6">
                 <h3 className="font-display text-lg text-maroon-dp mb-4 flex items-center gap-2"><Package size={16} /> Items</h3>
