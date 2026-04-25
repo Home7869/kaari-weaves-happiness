@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-import SiteLayout from "@/components/site/SiteLayout";
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import ProductDetail from "./pages/ProductDetail";
@@ -13,7 +12,7 @@ import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
 import NotFound from "./pages/NotFound";
 
-import RequireAdmin from "./components/admin/RequireAdmin";
+import { RequireAdmin } from "./components/admin/RequireAdmin";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -32,15 +31,13 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           {/* Storefront */}
-          <Route element={<SiteLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/shop/:category" element={<Shop />} />
-            <Route path="/product/:slug" element={<ProductDetail />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/order/:orderNumber" element={<OrderSuccess />} />
-          </Route>
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/shop/:category" element={<Shop />} />
+          <Route path="/product/:slug" element={<ProductDetail />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order/:orderNumber" element={<OrderSuccess />} />
 
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
