@@ -86,6 +86,8 @@ export const api = {
   // Orders
   createOrder: (body: unknown) => callFn("/create-order", { method: "POST", body }),
   getOrder: (order_number: string) => callFn("/get-order", { query: { order_number } }),
+  trackOrder: (order_number: string, email: string) =>
+    callFn("/track-order", { method: "POST", body: { order_number, email } }),
 
   // Admin
   adminLogin: (password: string) => callFn("/admin-login", { method: "POST", body: { password } }),
