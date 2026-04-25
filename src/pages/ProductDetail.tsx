@@ -33,12 +33,14 @@ export default function ProductDetail() {
 
   useEffect(() => {
     setP(null);
-    api.getProductBySlug(slug).then((d) => {
-      setP(d as ProductFull);
-      if (d?.sizes?.length) setSize(d.sizes[0]);
-      if (d?.colors?.length) setColor(d.colors[0].name);
-      if (d?.id) api.getReviews(d.id).then(setReviews as any);
-      if (d?.category) api.listProducts({ category: d.category }).then((rs) => setRelated((rs as Product[]).filter((x) => x.id !== d.id).slice(0, 4)));
+    api.getProductBySlug(slug).then((d: any) => {
+      if (!d) return;
+      const full = d as ProductFull;
+      setP(full);
+      if (Array.isArray(full.sizes) && full.sizes.length) setSize(full.sizes[0]);
+      if (Array.isArray(full.colors) && full.colors.length) setColor(full.colors[0].name);
+      api.getReviews(full.id).then(setReviews as any);
+      api.listProducts({ category: full.category }).then((rs) => setRelated((rs as Product[]).filter((x) => x.id !== full.id).slice(0, 4)));
     });
   }, [slug]);
 
