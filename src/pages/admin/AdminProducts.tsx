@@ -40,7 +40,7 @@ export default function AdminProducts() {
                 <td>{p.is_active ? "✓" : "✗"}</td>
                 <td className="pr-3">
                   <div className="flex gap-2 justify-end">
-                    <Link to={`/admin/products/${p.id}/edit`} className="p-1.5 text-maroon hover:bg-maroon/10 rounded"><Edit2 size={14} /></Link>
+                    <Link to={`/admin/products/${p.id}`} className="p-1.5 text-maroon hover:bg-maroon/10 rounded"><Edit2 size={14} /></Link>
                     <button onClick={() => del(p.id)} className="p-1.5 text-destructive hover:bg-destructive/10 rounded"><Trash2 size={14} /></button>
                   </div>
                 </td>

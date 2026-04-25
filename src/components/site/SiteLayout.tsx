@@ -5,7 +5,7 @@ import { WhatsappFab } from "./WhatsappFab";
 import { CartDrawer } from "./CartDrawer";
 import { api } from "@/lib/api";
 
-export function SiteLayout({ children }: { children: ReactNode }) {
+export function SiteLayout({ children }: { children?: ReactNode }) {
   const [settings, setSettings] = useState<{ announcement_text?: string; whatsapp_number?: string; instagram_handle?: string } | null>(null);
   useEffect(() => { api.getSettings().then(setSettings).catch(() => {}); }, []);
   return (
@@ -19,3 +19,5 @@ export function SiteLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+export default SiteLayout;
