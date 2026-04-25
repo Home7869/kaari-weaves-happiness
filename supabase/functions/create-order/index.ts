@@ -52,6 +52,9 @@ Deno.serve(async (req) => {
     const total = subtotal + shipping;
     const order_number = genOrderNumber();
 
+    const cfModeEarly = (Deno.env.get("CASHFREE_ENV") ?? "sandbox").toLowerCase() === "production"
+      ? "production" : "sandbox";
+
     // Insert order (pending)
     const { data: order, error: oErr } = await supabase.from("orders").insert({
       order_number,
@@ -63,6 +66,7 @@ Deno.serve(async (req) => {
       subtotal, shipping_charges: shipping, total,
       payment_status: "pending",
       order_status: "processing",
+      cashfree_mode: cfModeEarly,
     }).select().single();
     if (oErr) throw oErr;
 
