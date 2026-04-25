@@ -19,6 +19,11 @@ type TrackResult = {
   updated_at: string;
   webhook_received_at: string | null;
   shipping_address: any;
+  tracking_carrier: string | null;
+  tracking_number: string | null;
+  tracking_url: string | null;
+  shipped_at: string | null;
+  delivered_at: string | null;
 };
 
 const ORDER_STEPS = [
