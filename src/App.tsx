@@ -40,6 +40,7 @@ const App = () => (
           <Route path="/search" element={<Search />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order/:orderNumber" element={<OrderSuccess />} />
+          <Route path="/track" element={<TrackOrder />} />
 
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/admin/products/new" element={<RequireAdmin><AdminProductEditor /></RequireAdmin>} />
           <Route path="/admin/products/:id" element={<RequireAdmin><AdminProductEditor /></RequireAdmin>} />
           <Route path="/admin/orders" element={<RequireAdmin><AdminOrders /></RequireAdmin>} />
+          <Route path="/admin/payments" element={<RequireAdmin><AdminPayments /></RequireAdmin>} />
           <Route path="/admin/customers" element={<RequireAdmin><AdminCustomers /></RequireAdmin>} />
           <Route path="/admin/settings" element={<RequireAdmin><AdminSettings /></RequireAdmin>} />
 
