@@ -180,6 +180,42 @@ export default function AdminPayments() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination footer */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gold/20 bg-cream-warm/30 px-4 py-3 text-xs text-maroon-dk">
+          <div className="flex items-center gap-2">
+            <span>Rows per page</span>
+            <select
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              className="bg-ivory border border-gold/40 rounded-md px-2 py-1 text-xs"
+            >
+              {[10, 20, 50, 100].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <div>
+            {loading ? "Loading…" : `Showing ${fromRow}–${toRow} of ${total}`}
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1 || loading}
+              className="p-1.5 rounded-md border border-gold/40 disabled:opacity-40 hover:bg-gold/10"
+              aria-label="Previous page"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <span className="px-2">Page {page} of {totalPages}</span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages || loading}
+              className="p-1.5 rounded-md border border-gold/40 disabled:opacity-40 hover:bg-gold/10"
+              aria-label="Next page"
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );
