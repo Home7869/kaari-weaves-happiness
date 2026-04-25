@@ -47,24 +47,49 @@ export default function AdminPayments() {
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<string>("all");
   const [pStatus, setPStatus] = useState<string>("all");
+  const [searchInput, setSearchInput] = useState("");
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [stats, setStats] = useState<{ paidOrders: number; pendingOrders: number; revenue: number } | null>(null);
+
+  // Debounce search input -> q
+  const debounceRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => {
+      setQ(searchInput.trim());
+      setPage(1);
+    }, 300);
+    return () => { if (debounceRef.current) window.clearTimeout(debounceRef.current); };
+  }, [searchInput]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => { setPage(1); }, [mode, pStatus, pageSize]);
 
   useEffect(() => {
     setLoading(true);
-    api.adminOrders({ mode, payment_status: pStatus })
-      .then((d) => setOrders(d?.orders ?? []))
+    api.adminOrders({ mode, payment_status: pStatus, q, page, page_size: pageSize })
+      .then((d: any) => {
+        setOrders(d?.orders ?? []);
+        setTotal(d?.total ?? 0);
+        setStats(d?.stats ?? null);
+      })
       .catch((e) => toast.error(e.message))
       .finally(() => setLoading(false));
-  }, [mode, pStatus]);
+  }, [mode, pStatus, q, page, pageSize]);
 
-  const totals = useMemo(() => {
-    const paid = orders.filter((o) => o.payment_status === "paid");
-    return {
-      count: orders.length,
-      paid: paid.length,
-      revenue: paid.reduce((s, o) => s + (o.total ?? 0), 0),
-      pending: orders.filter((o) => o.payment_status === "pending").length,
-    };
-  }, [orders]);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const fromRow = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const toRow = Math.min(page * pageSize, total);
+
+  const cardTotals = useMemo(() => ({
+    count: total,
+    paid: stats?.paidOrders ?? 0,
+    pending: stats?.pendingOrders ?? 0,
+    revenue: stats?.revenue ?? 0,
+  }), [total, stats]);
 
   return (
     <AdminLayout>
@@ -74,6 +99,18 @@ export default function AdminPayments() {
           <p className="text-sm text-muted-foreground mt-1">All payment transactions captured by Cashfree, with mode and webhook timestamps.</p>
         </div>
         <div className="flex flex-wrap gap-3">
+          <label className="flex flex-col">
+            <span className="text-[10px] uppercase tracking-[0.14em] text-maroon-dk mb-1">Search</span>
+            <div className="relative">
+              <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Order # or Cashfree ID"
+                className="bg-ivory border border-gold/40 rounded-lg pl-9 pr-3 py-2 text-sm text-maroon-dp outline-none focus:border-maroon w-64"
+              />
+            </div>
+          </label>
           <Select label="Mode" value={mode} onChange={setMode} options={[
             { v: "all", l: "All modes" },
             { v: "sandbox", l: "Sandbox" },
@@ -89,10 +126,10 @@ export default function AdminPayments() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Stat label="Transactions" value={String(totals.count)} />
-        <Stat label="Paid" value={String(totals.paid)} />
-        <Stat label="Pending" value={String(totals.pending)} />
-        <Stat label="Revenue (paid)" value={formatINR(totals.revenue)} />
+        <Stat label="Transactions" value={String(cardTotals.count)} />
+        <Stat label="Paid" value={String(cardTotals.paid)} />
+        <Stat label="Pending" value={String(cardTotals.pending)} />
+        <Stat label="Revenue (paid)" value={formatINR(cardTotals.revenue)} />
       </div>
 
       <div className="bg-ivory rounded-xl border border-gold/25 overflow-hidden">
