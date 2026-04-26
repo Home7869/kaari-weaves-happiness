@@ -28,11 +28,22 @@ export default function Checkout() {
     if (!f.name || !f.email || !f.phone || !f.line1 || !f.city || !f.state || !f.pincode) {
       return toast.error("Please fill all required fields");
     }
+    // Normalize & validate Indian phone for Cashfree
+    const digits = f.phone.replace(/\D/g, "");
+    let normalizedPhone = digits;
+    if (digits.length === 12 && digits.startsWith("91")) normalizedPhone = digits.slice(2);
+    else if (digits.length === 13 && digits.startsWith("091")) normalizedPhone = digits.slice(3);
+    if (!/^[6-9]\d{9}$/.test(normalizedPhone)) {
+      return toast.error("Enter a valid 10-digit Indian mobile number (starting 6-9)");
+    }
+    if (!/^\d{6}$/.test(f.pincode)) {
+      return toast.error("Enter a valid 6-digit pincode");
+    }
     setSubmitting(true);
     try {
       const res = await api.createOrder({
         customer: {
-          name: f.name, email: f.email, phone: f.phone,
+          name: f.name, email: f.email, phone: normalizedPhone,
           address: { line1: f.line1, line2: f.line2, city: f.city, state: f.state, pincode: f.pincode },
         },
         items: items.map((i) => ({ product_id: i.product_id, qty: i.qty, size: i.size, color: i.color })),
