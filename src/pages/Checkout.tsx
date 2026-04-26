@@ -48,13 +48,17 @@ export default function Checkout() {
   const [delivery, setDelivery] = useState<DeliveryType>("standard");
   const [promo, setPromo] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
 
   // Pricing
   const baseShip = sub === 0 ? 0 : sub >= 999 ? 0 : 60;
   const expressShip = sub === 0 ? 0 : sub >= 999 ? 99 : 159;
   const shipping = delivery === "express" ? expressShip : baseShip;
-  const discount = appliedPromo === "KAARI10" ? Math.round(sub * 0.1) : 0;
+  const discount = appliedPromo ? promoDiscount : 0;
   const total = Math.max(0, sub + shipping - discount);
+  const promoBlocksCheckout = !!promo.trim() && !appliedPromo;
 
   // ETA
   const eta = useMemo(() => getEta(delivery), [delivery]);
@@ -200,15 +204,38 @@ export default function Checkout() {
     );
   };
 
-  const applyPromo = () => {
-    const code = promo.trim().toUpperCase();
-    if (code === "KAARI10") {
-      setAppliedPromo("KAARI10");
-      toast.success("Promo applied — 10% off");
-    } else {
-      setAppliedPromo(null);
-      toast.error("Invalid promo code");
+  const applyPromo = async () => {
+    const code = promo.trim();
+    if (!code) {
+      setAppliedPromo(null); setPromoDiscount(0); setPromoError(null);
+      return;
     }
+    setPromoLoading(true);
+    setPromoError(null);
+    try {
+      const res = await api.validatePromo(code, sub);
+      if (res?.valid) {
+        setAppliedPromo(res.code);
+        setPromoDiscount(res.discount ?? 0);
+        setPromoError(null);
+        toast.success(res.message ?? "Promo applied");
+      } else {
+        setAppliedPromo(null);
+        setPromoDiscount(0);
+        setPromoError(res?.message ?? "Invalid promo code");
+        toast.error(res?.message ?? "Invalid promo code");
+      }
+    } catch (e: any) {
+      setAppliedPromo(null);
+      setPromoDiscount(0);
+      setPromoError(e?.message ?? "Could not validate promo");
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const clearPromo = () => {
+    setPromo(""); setAppliedPromo(null); setPromoDiscount(0); setPromoError(null);
   };
 
   const clearForm = () => {
@@ -235,6 +262,9 @@ export default function Checkout() {
     }
     if (f.line1.trim().length < 10) {
       return toast.error("Address Line 1 must be at least 10 characters");
+    }
+    if (promoBlocksCheckout) {
+      return toast.error("Apply or remove the promo code before paying");
     }
     setSubmitting(true);
     try {
@@ -444,10 +474,10 @@ export default function Checkout() {
             </div>
 
             <button
-              disabled={submitting || items.length === 0}
+              disabled={submitting || items.length === 0 || promoBlocksCheckout}
               className="hidden lg:block w-full bg-gold hover:bg-gold-lt disabled:opacity-50 text-maroon-dp font-semibold py-4 rounded-full text-sm uppercase tracking-[0.16em] transition-colors"
             >
-              {submitting ? "Processing…" : `Pay ${formatINR(total)}`}
+              {submitting ? "Processing…" : promoBlocksCheckout ? "Apply or remove promo to continue" : `Pay ${formatINR(total)}`}
             </button>
           </form>
 
@@ -471,20 +501,43 @@ export default function Checkout() {
             </div>
 
             {/* Promo */}
-            <div className="mt-4 flex gap-2">
-              <input
-                value={promo}
-                onChange={(e) => setPromo(e.target.value)}
-                placeholder="Promo code"
-                className="flex-1 bg-cream-warm/50 border border-maroon/15 rounded-lg px-3 py-2 text-sm outline-none focus:border-maroon"
-              />
-              <button
-                type="button"
-                onClick={applyPromo}
-                className="px-4 py-2 text-xs uppercase tracking-[0.14em] bg-maroon text-ivory rounded-lg hover:bg-maroon-dp transition-colors"
-              >
-                Apply
-              </button>
+            <div className="mt-4">
+              <div className="flex gap-2">
+                <input
+                  value={promo}
+                  onChange={(e) => {
+                    setPromo(e.target.value);
+                    if (appliedPromo) { setAppliedPromo(null); setPromoDiscount(0); }
+                    if (promoError) setPromoError(null);
+                  }}
+                  placeholder="Promo code (try KAARI10)"
+                  className={`flex-1 bg-cream-warm/50 border rounded-lg px-3 py-2 text-sm outline-none focus:border-maroon ${
+                    promoError ? "border-red-500" : appliedPromo ? "border-green-600" : "border-maroon/15"
+                  }`}
+                />
+                {appliedPromo ? (
+                  <button
+                    type="button"
+                    onClick={clearPromo}
+                    className="px-4 py-2 text-xs uppercase tracking-[0.14em] bg-cream border border-maroon/30 text-maroon rounded-lg hover:bg-cream-warm transition-colors"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={applyPromo}
+                    disabled={promoLoading || !promo.trim()}
+                    className="px-4 py-2 text-xs uppercase tracking-[0.14em] bg-maroon text-ivory rounded-lg hover:bg-maroon-dp transition-colors disabled:opacity-50"
+                  >
+                    {promoLoading ? "…" : "Apply"}
+                  </button>
+                )}
+              </div>
+              {promoError && <p className="text-[11px] text-red-600 mt-1.5">{promoError}</p>}
+              {appliedPromo && !promoError && (
+                <p className="text-[11px] text-green-700 mt-1.5">✓ {appliedPromo} applied — you saved {formatINR(discount)}</p>
+              )}
             </div>
 
             <div className="mt-5 pt-5 border-t border-gold/25 space-y-2 text-sm">
@@ -517,10 +570,10 @@ export default function Checkout() {
                 const form = (e.currentTarget.closest("section")?.querySelector("form") as HTMLFormElement | null);
                 form?.requestSubmit();
               }}
-              disabled={submitting || items.length === 0}
+              disabled={submitting || items.length === 0 || promoBlocksCheckout}
               className="hidden lg:block mt-5 w-full bg-gold hover:bg-gold-lt disabled:opacity-50 text-maroon-dp font-semibold h-[52px] rounded-full text-sm uppercase tracking-[0.16em] transition-colors"
             >
-              {submitting ? "Processing…" : "Proceed to Pay"}
+              {submitting ? "Processing…" : promoBlocksCheckout ? "Apply or remove promo" : "Proceed to Pay"}
             </button>
 
             <div className="mt-4 flex items-center justify-between text-[11px] text-muted-foreground">
@@ -541,10 +594,10 @@ export default function Checkout() {
               const form = document.querySelector("form") as HTMLFormElement | null;
               form?.requestSubmit();
             }}
-            disabled={submitting || items.length === 0}
+            disabled={submitting || items.length === 0 || promoBlocksCheckout}
             className="bg-gold hover:bg-gold-lt disabled:opacity-50 text-maroon-dp font-semibold px-6 py-3 rounded-full text-xs uppercase tracking-[0.14em] transition-colors"
           >
-            {submitting ? "Processing…" : "Proceed to Pay →"}
+            {submitting ? "Processing…" : promoBlocksCheckout ? "Apply promo" : "Proceed to Pay →"}
           </button>
         </div>
       </section>

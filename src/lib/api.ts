@@ -88,6 +88,8 @@ export const api = {
   getOrder: (order_number: string) => callFn("/get-order", { query: { order_number } }),
   trackOrder: (order_number: string, email: string) =>
     callFn("/track-order", { method: "POST", body: { order_number, email } }),
+  validatePromo: (code: string, subtotal: number) =>
+    callFn("/validate-promo", { method: "POST", body: { code, subtotal } }),
 
   // Admin
   adminLogin: (password: string) => callFn("/admin-login", { method: "POST", body: { password } }),
