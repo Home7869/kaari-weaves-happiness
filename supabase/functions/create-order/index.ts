@@ -20,7 +20,8 @@ Deno.serve(async (req) => {
   const supabase = adminClient();
   try {
     const body = await req.json();
-    const { customer, items, return_url } = body;
+    const { customer, items, return_url, delivery_type, promo_code } = body;
+    const deliveryType: "standard" | "express" = delivery_type === "express" ? "express" : "standard";
     if (!customer?.name || !customer?.email || !customer?.phone || !customer?.address) {
       return json({ error: "Missing customer fields" }, 400);
     }
@@ -48,9 +49,34 @@ Deno.serve(async (req) => {
     const { data: settings } = await supabase.from("settings").select("*").eq("id", 1).single();
     const threshold = settings?.free_shipping_threshold ?? 999;
     const shipFee = settings?.shipping_fee ?? 60;
-    const shipping = subtotal >= threshold ? 0 : shipFee;
-    const total = subtotal + shipping;
+    const baseShip = subtotal >= threshold ? 0 : shipFee;
+    const expressFee = subtotal >= threshold ? 99 : 159;
+    const shipping = deliveryType === "express" ? expressFee : baseShip;
+
+    // Promo code
+    let discount = 0;
+    let appliedPromo: string | null = null;
+    if (typeof promo_code === "string" && promo_code.trim().toUpperCase() === "KAARI10") {
+      discount = Math.round(subtotal * 0.1);
+      appliedPromo = "KAARI10";
+    }
+
+    const total = Math.max(0, subtotal + shipping - discount);
     const order_number = genOrderNumber();
+
+    // Estimated delivery (skip Sundays)
+    const addWorkingDays = (start: Date, days: number) => {
+      const d = new Date(start);
+      let added = 0;
+      while (added < days) {
+        d.setDate(d.getDate() + 1);
+        if (d.getDay() !== 0) added++;
+      }
+      return d;
+    };
+    const now = new Date();
+    const etaFrom = deliveryType === "express" ? addWorkingDays(now, 3) : addWorkingDays(now, 8);
+    const etaTo = deliveryType === "express" ? addWorkingDays(now, 5) : addWorkingDays(now, 10);
 
     const cfModeEarly = (Deno.env.get("CASHFREE_ENV") ?? "sandbox").toLowerCase() === "production"
       ? "production" : "sandbox";
@@ -67,6 +93,12 @@ Deno.serve(async (req) => {
       payment_status: "pending",
       order_status: "processing",
       cashfree_mode: cfModeEarly,
+      delivery_type: deliveryType,
+      delivery_charge: shipping,
+      estimated_delivery_from: etaFrom.toISOString(),
+      estimated_delivery_to: etaTo.toISOString(),
+      promo_code: appliedPromo,
+      discount,
     }).select().single();
     if (oErr) throw oErr;
 

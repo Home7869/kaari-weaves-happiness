@@ -53,12 +53,18 @@ export type Database = {
           customer_name: string
           customer_phone: string
           delivered_at: string | null
+          delivery_charge: number | null
+          delivery_type: string | null
+          discount: number | null
+          estimated_delivery_from: string | null
+          estimated_delivery_to: string | null
           id: string
           items: Json
           order_number: string
           order_status: string
           payment_session_id: string | null
           payment_status: string
+          promo_code: string | null
           shipped_at: string | null
           shipping_address: Json
           shipping_charges: number
@@ -78,12 +84,18 @@ export type Database = {
           customer_name: string
           customer_phone: string
           delivered_at?: string | null
+          delivery_charge?: number | null
+          delivery_type?: string | null
+          discount?: number | null
+          estimated_delivery_from?: string | null
+          estimated_delivery_to?: string | null
           id?: string
           items: Json
           order_number: string
           order_status?: string
           payment_session_id?: string | null
           payment_status?: string
+          promo_code?: string | null
           shipped_at?: string | null
           shipping_address: Json
           shipping_charges?: number
@@ -103,12 +115,18 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           delivered_at?: string | null
+          delivery_charge?: number | null
+          delivery_type?: string | null
+          discount?: number | null
+          estimated_delivery_from?: string | null
+          estimated_delivery_to?: string | null
           id?: string
           items?: Json
           order_number?: string
           order_status?: string
           payment_session_id?: string | null
           payment_status?: string
+          promo_code?: string | null
           shipped_at?: string | null
           shipping_address?: Json
           shipping_charges?: number
