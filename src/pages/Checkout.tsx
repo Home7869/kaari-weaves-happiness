@@ -498,20 +498,43 @@ export default function Checkout() {
             </div>
 
             {/* Promo */}
-            <div className="mt-4 flex gap-2">
-              <input
-                value={promo}
-                onChange={(e) => setPromo(e.target.value)}
-                placeholder="Promo code"
-                className="flex-1 bg-cream-warm/50 border border-maroon/15 rounded-lg px-3 py-2 text-sm outline-none focus:border-maroon"
-              />
-              <button
-                type="button"
-                onClick={applyPromo}
-                className="px-4 py-2 text-xs uppercase tracking-[0.14em] bg-maroon text-ivory rounded-lg hover:bg-maroon-dp transition-colors"
-              >
-                Apply
-              </button>
+            <div className="mt-4">
+              <div className="flex gap-2">
+                <input
+                  value={promo}
+                  onChange={(e) => {
+                    setPromo(e.target.value);
+                    if (appliedPromo) { setAppliedPromo(null); setPromoDiscount(0); }
+                    if (promoError) setPromoError(null);
+                  }}
+                  placeholder="Promo code (try KAARI10)"
+                  className={`flex-1 bg-cream-warm/50 border rounded-lg px-3 py-2 text-sm outline-none focus:border-maroon ${
+                    promoError ? "border-red-500" : appliedPromo ? "border-green-600" : "border-maroon/15"
+                  }`}
+                />
+                {appliedPromo ? (
+                  <button
+                    type="button"
+                    onClick={clearPromo}
+                    className="px-4 py-2 text-xs uppercase tracking-[0.14em] bg-cream border border-maroon/30 text-maroon rounded-lg hover:bg-cream-warm transition-colors"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={applyPromo}
+                    disabled={promoLoading || !promo.trim()}
+                    className="px-4 py-2 text-xs uppercase tracking-[0.14em] bg-maroon text-ivory rounded-lg hover:bg-maroon-dp transition-colors disabled:opacity-50"
+                  >
+                    {promoLoading ? "…" : "Apply"}
+                  </button>
+                )}
+              </div>
+              {promoError && <p className="text-[11px] text-red-600 mt-1.5">{promoError}</p>}
+              {appliedPromo && !promoError && (
+                <p className="text-[11px] text-green-700 mt-1.5">✓ {appliedPromo} applied — you saved {formatINR(discount)}</p>
+              )}
             </div>
 
             <div className="mt-5 pt-5 border-t border-gold/25 space-y-2 text-sm">
