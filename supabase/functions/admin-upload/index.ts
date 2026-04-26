@@ -21,17 +21,24 @@ Deno.serve(async (req) => {
       const file = form.get("file");
       const slug = String(form.get("slug") ?? "misc");
       if (!(file instanceof File)) return json({ error: "file required" }, 400);
-      if (file.type !== "image/webp") {
-        return json({ error: "Only .webp files allowed. Convert before upload." }, 400);
+      const allowed: Record<string, string> = {
+        "image/webp": "webp",
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/avif": "avif",
+      };
+      const ext = allowed[file.type];
+      if (!ext) {
+        return json({ error: "Only webp, jpg, png, or avif images are allowed." }, 400);
       }
-      if (file.size > 4 * 1024 * 1024) {
-        return json({ error: "File too large (max 4MB)" }, 400);
+      if (file.size > 8 * 1024 * 1024) {
+        return json({ error: "File too large (max 8MB)" }, 400);
       }
       const ts = Date.now().toString(36);
       const rand = Math.random().toString(36).slice(2, 8);
-      const path = `products/${slug}/${ts}-${rand}.webp`;
+      const path = `products/${slug}/${ts}-${rand}.${ext}`;
       const { error: upErr } = await supabase.storage.from("product-images").upload(path, file, {
-        contentType: "image/webp",
+        contentType: file.type,
         upsert: false,
       });
       if (upErr) throw upErr;
