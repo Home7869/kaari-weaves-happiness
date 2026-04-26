@@ -20,7 +20,8 @@ Deno.serve(async (req) => {
   const supabase = adminClient();
   try {
     const body = await req.json();
-    const { customer, items, return_url } = body;
+    const { customer, items, return_url, delivery_type, promo_code } = body;
+    const deliveryType: "standard" | "express" = delivery_type === "express" ? "express" : "standard";
     if (!customer?.name || !customer?.email || !customer?.phone || !customer?.address) {
       return json({ error: "Missing customer fields" }, 400);
     }
