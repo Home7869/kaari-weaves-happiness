@@ -263,6 +263,9 @@ export default function Checkout() {
     if (f.line1.trim().length < 10) {
       return toast.error("Address Line 1 must be at least 10 characters");
     }
+    if (promoBlocksCheckout) {
+      return toast.error("Apply or remove the promo code before paying");
+    }
     setSubmitting(true);
     try {
       const res = await api.createOrder({
@@ -471,10 +474,10 @@ export default function Checkout() {
             </div>
 
             <button
-              disabled={submitting || items.length === 0}
+              disabled={submitting || items.length === 0 || promoBlocksCheckout}
               className="hidden lg:block w-full bg-gold hover:bg-gold-lt disabled:opacity-50 text-maroon-dp font-semibold py-4 rounded-full text-sm uppercase tracking-[0.16em] transition-colors"
             >
-              {submitting ? "Processing…" : `Pay ${formatINR(total)}`}
+              {submitting ? "Processing…" : promoBlocksCheckout ? "Apply or remove promo to continue" : `Pay ${formatINR(total)}`}
             </button>
           </form>
 
@@ -567,10 +570,10 @@ export default function Checkout() {
                 const form = (e.currentTarget.closest("section")?.querySelector("form") as HTMLFormElement | null);
                 form?.requestSubmit();
               }}
-              disabled={submitting || items.length === 0}
+              disabled={submitting || items.length === 0 || promoBlocksCheckout}
               className="hidden lg:block mt-5 w-full bg-gold hover:bg-gold-lt disabled:opacity-50 text-maroon-dp font-semibold h-[52px] rounded-full text-sm uppercase tracking-[0.16em] transition-colors"
             >
-              {submitting ? "Processing…" : "Proceed to Pay"}
+              {submitting ? "Processing…" : promoBlocksCheckout ? "Apply or remove promo" : "Proceed to Pay"}
             </button>
 
             <div className="mt-4 flex items-center justify-between text-[11px] text-muted-foreground">
@@ -591,10 +594,10 @@ export default function Checkout() {
               const form = document.querySelector("form") as HTMLFormElement | null;
               form?.requestSubmit();
             }}
-            disabled={submitting || items.length === 0}
+            disabled={submitting || items.length === 0 || promoBlocksCheckout}
             className="bg-gold hover:bg-gold-lt disabled:opacity-50 text-maroon-dp font-semibold px-6 py-3 rounded-full text-xs uppercase tracking-[0.14em] transition-colors"
           >
-            {submitting ? "Processing…" : "Proceed to Pay →"}
+            {submitting ? "Processing…" : promoBlocksCheckout ? "Apply promo" : "Proceed to Pay →"}
           </button>
         </div>
       </section>
