@@ -48,13 +48,17 @@ export default function Checkout() {
   const [delivery, setDelivery] = useState<DeliveryType>("standard");
   const [promo, setPromo] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
 
   // Pricing
   const baseShip = sub === 0 ? 0 : sub >= 999 ? 0 : 60;
   const expressShip = sub === 0 ? 0 : sub >= 999 ? 99 : 159;
   const shipping = delivery === "express" ? expressShip : baseShip;
-  const discount = appliedPromo === "KAARI10" ? Math.round(sub * 0.1) : 0;
+  const discount = appliedPromo ? promoDiscount : 0;
   const total = Math.max(0, sub + shipping - discount);
+  const promoBlocksCheckout = !!promo.trim() && !appliedPromo;
 
   // ETA
   const eta = useMemo(() => getEta(delivery), [delivery]);
@@ -200,15 +204,38 @@ export default function Checkout() {
     );
   };
 
-  const applyPromo = () => {
-    const code = promo.trim().toUpperCase();
-    if (code === "KAARI10") {
-      setAppliedPromo("KAARI10");
-      toast.success("Promo applied — 10% off");
-    } else {
-      setAppliedPromo(null);
-      toast.error("Invalid promo code");
+  const applyPromo = async () => {
+    const code = promo.trim();
+    if (!code) {
+      setAppliedPromo(null); setPromoDiscount(0); setPromoError(null);
+      return;
     }
+    setPromoLoading(true);
+    setPromoError(null);
+    try {
+      const res = await api.validatePromo(code, sub);
+      if (res?.valid) {
+        setAppliedPromo(res.code);
+        setPromoDiscount(res.discount ?? 0);
+        setPromoError(null);
+        toast.success(res.message ?? "Promo applied");
+      } else {
+        setAppliedPromo(null);
+        setPromoDiscount(0);
+        setPromoError(res?.message ?? "Invalid promo code");
+        toast.error(res?.message ?? "Invalid promo code");
+      }
+    } catch (e: any) {
+      setAppliedPromo(null);
+      setPromoDiscount(0);
+      setPromoError(e?.message ?? "Could not validate promo");
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const clearPromo = () => {
+    setPromo(""); setAppliedPromo(null); setPromoDiscount(0); setPromoError(null);
   };
 
   const clearForm = () => {
